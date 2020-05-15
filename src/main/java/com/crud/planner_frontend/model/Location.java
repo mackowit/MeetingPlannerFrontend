@@ -1,4 +1,4 @@
-package com.crud.planner_frontend;
+package com.crud.planner_frontend.model;
 
 public class Location {
     private String description;
@@ -36,5 +36,10 @@ public class Location {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "" + description + ", " + city + ", " +address;
     }
 }
