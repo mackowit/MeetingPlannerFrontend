@@ -8,17 +8,15 @@ public class Meeting {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private Location location;
-    private User meetingOwner;
     private List<User> participants;
 
     public Meeting() {
     }
 
-    public Meeting(LocalDateTime startDate, LocalDateTime endDate, Location location, User meetingOwner, List<User> participants) {
+    public Meeting(LocalDateTime startDate, LocalDateTime endDate, Location location, List<User> participants) {
         this.startDate = startDate;
         this.endDate = endDate;
         this.location = location;
-        this.meetingOwner = meetingOwner;
         this.participants = participants;
     }
 
@@ -44,14 +42,6 @@ public class Meeting {
 
     public void setLocation(Location location) {
         this.location = location;
-    }
-
-    public User getMeetingOwner() {
-        return meetingOwner;
-    }
-
-    public void setMeetingOwner(User meetingOwner) {
-        this.meetingOwner = meetingOwner;
     }
 
     public List<User> getParticipants() {

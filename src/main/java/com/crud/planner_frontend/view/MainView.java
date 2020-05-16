@@ -27,7 +27,10 @@ public class MainView extends VerticalLayout {
 
     public MainView() {
         meetingForm.setEnabled(false);
-        meetingsMainViewGrid.setColumns("startDate", "endDate", "location", "meetingOwner");
+        meetingsMainViewGrid.setColumns("startDate", "endDate", "location");
+        viewMeeting.setEnabled(false);
+        editMeeting.setEnabled(false);
+        deleteMeeting.setEnabled(false);
 
         HorizontalLayout buttonBar = new HorizontalLayout(addNewMeeting, viewMeeting, editMeeting, deleteMeeting);
         VerticalLayout mainContent = new VerticalLayout(meetingLabel, meetingsMainViewGrid, buttonBar);
@@ -37,10 +40,29 @@ public class MainView extends VerticalLayout {
         meetingsMainViewGrid.setItems(meetingService.getMeetings());
 
         addNewMeeting.addClickListener(event -> addMeeting());
+        viewMeeting.addClickListener(event -> viewMeeting());
+
+        meetingsMainViewGrid.asSingleSelect().addValueChangeListener(event -> {
+            viewMeeting.setEnabled(true);
+            editMeeting.setEnabled(true);
+            deleteMeeting.setEnabled(true);
+        });
     }
 
     public void addMeeting() {
         meetingForm.setEnabled(true);
+    }
+
+    public void viewMeeting() {
+        meetingForm.setMeeting(meetingsMainViewGrid.asSingleSelect().getValue());
+        meetingForm.setEnabled(true);
+        meetingForm.getSave().setVisible(false);
+        meetingForm.getCancel().setVisible(false);
+        meetingForm.getAddParticipants().setVisible(false);
+        meetingForm.getManageLocations().setVisible(false);
+        meetingForm.getManageUsers().setVisible(false);
+        meetingForm.getRemoveParticipants().setVisible(false);
+        meetingForm.focusOn();
     }
 
     /*private void listLocations() {

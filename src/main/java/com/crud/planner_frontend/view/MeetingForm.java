@@ -1,37 +1,38 @@
 package com.crud.planner_frontend.view;
 
 import com.crud.planner_frontend.model.Location;
+import com.crud.planner_frontend.model.Meeting;
 import com.crud.planner_frontend.model.User;
 import com.crud.planner_frontend.service.LocationService;
 import com.crud.planner_frontend.service.UserService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.data.binder.Binder;
 
 public class MeetingForm extends VerticalLayout {
 
     private Label startLabel = new Label("Set start date and time");
     private Label endLabel = new Label("Set end date and time");
-    private DatePicker startDate = new DatePicker();
-    private DatePicker endDate = new DatePicker();
-    private TimePicker startTime = new TimePicker();
-    private TimePicker endTime = new TimePicker();
+    private LocalDateTimeField startDate = new LocalDateTimeField();
+    private LocalDateTimeField endDate = new LocalDateTimeField();
     private Label locationLabel = new Label("Select location");
     private ComboBox<Location> location = new ComboBox<>();
-    private Label meetingOwnerLabel = new Label("Select meeting owner");
     private Label participantsLabel = new Label("Select participants");
-    private ComboBox<User> meetingOwner = new ComboBox<>("Meeting Owner");
-    private ComboBox<User> participants = new ComboBox<>("Participants");
+    private ComboBox<User> participantPicker = new ComboBox<>("Participants");
+    private Label participantsGridLabel = new Label("List of participants");
+    private Grid<User> participants = new Grid<>(User.class);
 
     private LocationService locationService = new LocationService();
     private UserService userService = new UserService();
 
     private Button manageLocations = new Button("Manage locations");
     private Button manageUsers = new Button("Manage users");
+    private Button addParticipants = new Button("Add participant");
+    private Button removeParticipants = new Button("Remove participant");
 
     private Button save = new Button("Save");
     private Button cancel = new Button("Cancel");
@@ -39,16 +40,17 @@ public class MeetingForm extends VerticalLayout {
     private LocationForm locationForm = new LocationForm();
     private UsersForm usersForm = new UsersForm();
 
+    private Binder<Meeting> binder = new Binder<>(Meeting.class);
+
     public MeetingForm() {
         location.setItems(locationService.getLocations());
-        meetingOwner.setItems(userService.getUsers());
         participants.setItems(userService.getUsers());
 
         //date and time
-        HorizontalLayout startFields = new HorizontalLayout(startDate, startTime);
+        HorizontalLayout startFields = new HorizontalLayout(startDate);
         VerticalLayout startPickers = new VerticalLayout(startLabel, startFields);
         startPickers.setSpacing(false);
-        HorizontalLayout endFields = new HorizontalLayout(endDate, endTime);
+        HorizontalLayout endFields = new HorizontalLayout(endDate);
         VerticalLayout endPickers = new VerticalLayout(endLabel, endFields);
         endPickers.setSpacing(false);
         HorizontalLayout setStartAndEnd = new HorizontalLayout(startPickers, endPickers);
@@ -65,14 +67,14 @@ public class MeetingForm extends VerticalLayout {
 
         //users
         usersForm.setVisible(false);
-        VerticalLayout meetingOwnerField = new VerticalLayout(meetingOwnerLabel, meetingOwner);
-        VerticalLayout participantsField = new VerticalLayout(participantsLabel, participants);
-        HorizontalLayout usersFieldsAndButton = new HorizontalLayout(meetingOwnerField, participantsField, manageUsers);
+        VerticalLayout participantsField = new VerticalLayout(participantsLabel, participantPicker, addParticipants);
+        participants.setColumns("firstname", "lastname", "email");
+        VerticalLayout participantsList = new VerticalLayout(participantsGridLabel, participants, removeParticipants);
+        HorizontalLayout usersFieldsAndButton = new HorizontalLayout(participantsField, participantsList, manageUsers);
         usersFieldsAndButton.setSpacing(false);
         HorizontalLayout selectUsers = new HorizontalLayout(usersFieldsAndButton, usersForm);
         selectUsers.setSpacing(false);
         selectUsers.setSizeFull();
-        selectUsers.getStyle().set("margin-left", "auto");
         manageUsers.addClickListener(event -> usersForm.setVisible(true));
 
         //general
@@ -80,7 +82,48 @@ public class MeetingForm extends VerticalLayout {
         save.addClickListener(event -> this.setEnabled(false));
         cancel.addClickListener(event -> this.setEnabled(false));
 
+        //binding
+        binder.bindInstanceFields(this);
+
         add(setStartAndEnd, selectLocation, selectUsers, buttons);
     }
 
+    public void setMeeting(Meeting meeting) {
+        binder.setBean(meeting);
+
+        if(meeting == null) {
+            setVisible(false);
+        } else {
+            setVisible(true);
+            startDate.focus();
+        }
+    }
+
+    public Button getSave() {
+        return save;
+    }
+
+    public Button getCancel() {
+        return cancel;
+    }
+
+    public Button getManageLocations() {
+        return manageLocations;
+    }
+
+    public Button getManageUsers() {
+        return manageUsers;
+    }
+
+    public Button getAddParticipants() {
+        return addParticipants;
+    }
+
+    public Button getRemoveParticipants() {
+        return removeParticipants;
+    }
+
+    public void focusOn() {
+        startDate.focus();
+    }
 }
