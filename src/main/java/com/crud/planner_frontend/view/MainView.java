@@ -23,10 +23,14 @@ public class MainView extends VerticalLayout {
     private Button editMeeting = new Button("Edit meeting");
     private Button deleteMeeting = new Button("Cancel meeting");
 
-    private MeetingForm meetingForm = new MeetingForm();
+    private NewMeetingForm newMeetingForm = new NewMeetingForm(this);
+    private ViewMeetingForm viewMeetingForm = new ViewMeetingForm(this);
+    private EditMeetingForm editMeetingForm = new EditMeetingForm(this);
 
     public MainView() {
-        meetingForm.setEnabled(false);
+        newMeetingForm.setVisible(false);
+        viewMeetingForm.setVisible(false);
+        editMeetingForm.setVisible(false);
         meetingsMainViewGrid.setColumns("startDate", "endDate", "location");
         viewMeeting.setEnabled(false);
         editMeeting.setEnabled(false);
@@ -36,11 +40,12 @@ public class MainView extends VerticalLayout {
         VerticalLayout mainContent = new VerticalLayout(meetingLabel, meetingsMainViewGrid, buttonBar);
         mainContent.setSizeFull();
         mainContent.getStyle().set("border", "1px solid black");
-        add(mainLabel, mainContent, meetingForm);
+        add(mainLabel, mainContent, newMeetingForm, viewMeetingForm, editMeetingForm);
         meetingsMainViewGrid.setItems(meetingService.getMeetings());
 
         addNewMeeting.addClickListener(event -> addMeeting());
         viewMeeting.addClickListener(event -> viewMeeting());
+        editMeeting.addClickListener(event -> editMeeting());
 
         meetingsMainViewGrid.asSingleSelect().addValueChangeListener(event -> {
             viewMeeting.setEnabled(true);
@@ -50,20 +55,38 @@ public class MainView extends VerticalLayout {
     }
 
     public void addMeeting() {
-        meetingForm.setEnabled(true);
+        newMeetingForm.setVisible(true);
+        addNewMeeting.setEnabled(false);
+        viewMeeting.setEnabled(false);
+        editMeeting.setEnabled(false);
+        deleteMeeting.setEnabled(false);
     }
 
     public void viewMeeting() {
-        meetingForm.setMeeting(meetingsMainViewGrid.asSingleSelect().getValue());
-        meetingForm.setEnabled(true);
-        meetingForm.getSave().setVisible(false);
-        meetingForm.getCancel().setVisible(false);
-        meetingForm.getAddParticipants().setVisible(false);
-        meetingForm.getManageLocations().setVisible(false);
-        meetingForm.getManageUsers().setVisible(false);
-        meetingForm.getRemoveParticipants().setVisible(false);
-        meetingForm.focusOn();
+        viewMeetingForm.setMeeting(meetingsMainViewGrid.asSingleSelect().getValue());
+        viewMeetingForm.setVisible(true);
+        addNewMeeting.setEnabled(false);
+        viewMeeting.setEnabled(false);
+        editMeeting.setEnabled(false);
+        deleteMeeting.setEnabled(false);
     }
+
+    public void editMeeting() {
+        editMeetingForm.setMeeting(meetingsMainViewGrid.asSingleSelect().getValue());
+        editMeetingForm.setVisible(true);
+        addNewMeeting.setEnabled(false);
+        viewMeeting.setEnabled(false);
+        editMeeting.setEnabled(false);
+        deleteMeeting.setEnabled(false);
+    }
+
+    /*public void setAddingNewMeeting(boolean addingNewMeeting) {
+        isAddingNewMeeting = addingNewMeeting;
+    }
+
+    public void setUpdatingMeeting(boolean updatingMeeting) {
+        isUpdatingMeeting = updatingMeeting;
+    }*/
 
     /*private void listLocations() {
        // List<Location> locationsList = exampleData();
@@ -88,4 +111,20 @@ public class MainView extends VerticalLayout {
                 Location[].class);
         return Arrays.asList(exchange.getBody());
     }*/
+
+    public Button getAddNewMeeting() {
+        return addNewMeeting;
+    }
+
+    public Button getViewMeeting() {
+        return viewMeeting;
+    }
+
+    public Button getEditMeeting() {
+        return editMeeting;
+    }
+
+    public Button getDeleteMeeting() {
+        return deleteMeeting;
+    }
 }

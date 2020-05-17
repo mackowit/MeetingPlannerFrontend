@@ -13,8 +13,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
 
-public class MeetingForm extends VerticalLayout {
+public class NewMeetingForm extends VerticalLayout {
 
+    private Label formLabel = new Label("New meeting");
     private Label startLabel = new Label("Set start date and time");
     private Label endLabel = new Label("Set end date and time");
     private LocalDateTimeField startDate = new LocalDateTimeField();
@@ -42,7 +43,7 @@ public class MeetingForm extends VerticalLayout {
 
     private Binder<Meeting> binder = new Binder<>(Meeting.class);
 
-    public MeetingForm() {
+    public NewMeetingForm(MainView mainView) {
         location.setItems(locationService.getLocations());
         participants.setItems(userService.getUsers());
 
@@ -79,51 +80,19 @@ public class MeetingForm extends VerticalLayout {
 
         //general
         HorizontalLayout buttons = new HorizontalLayout(save, cancel);
-        save.addClickListener(event -> this.setEnabled(false));
-        cancel.addClickListener(event -> this.setEnabled(false));
+        save.addClickListener(event -> {
+            this.setVisible(false);
+            mainView.getAddNewMeeting().setEnabled(true);
+        });
+        cancel.addClickListener(event -> {
+            this.setVisible(false);
+            mainView.getAddNewMeeting().setEnabled(true);
+        });
 
         //binding
         binder.bindInstanceFields(this);
 
-        add(setStartAndEnd, selectLocation, selectUsers, buttons);
-    }
-
-    public void setMeeting(Meeting meeting) {
-        binder.setBean(meeting);
-
-        if(meeting == null) {
-            setVisible(false);
-        } else {
-            setVisible(true);
-            startDate.focus();
-        }
-    }
-
-    public Button getSave() {
-        return save;
-    }
-
-    public Button getCancel() {
-        return cancel;
-    }
-
-    public Button getManageLocations() {
-        return manageLocations;
-    }
-
-    public Button getManageUsers() {
-        return manageUsers;
-    }
-
-    public Button getAddParticipants() {
-        return addParticipants;
-    }
-
-    public Button getRemoveParticipants() {
-        return removeParticipants;
-    }
-
-    public void focusOn() {
+        add(formLabel, setStartAndEnd, selectLocation, selectUsers, buttons);
         startDate.focus();
     }
 }
