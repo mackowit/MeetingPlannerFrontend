@@ -2,6 +2,7 @@ package com.crud.planner_frontend.view;
 
 import com.crud.planner_frontend.model.Group;
 import com.crud.planner_frontend.model.Location;
+import com.crud.planner_frontend.model.Meeting;
 import com.crud.planner_frontend.model.User;
 import com.crud.planner_frontend.service.LocationService;
 import com.crud.planner_frontend.service.UserService;
@@ -12,6 +13,7 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 
 public class UsersForm extends HorizontalLayout {
 
@@ -27,7 +29,12 @@ public class UsersForm extends HorizontalLayout {
     private Button editUser = new Button("Edit");
     private Button deleteUser = new Button("Delete");
 
+    boolean addUserFlag = false;
+    boolean editUserFlag = false;
+
     private UserService userService = new UserService();
+
+    private Binder<User> binder = new Binder<>(User.class);
 
     public UsersForm() {
         usersGrid.setColumns("firstname", "lastname", "email", "group");
@@ -37,10 +44,36 @@ public class UsersForm extends HorizontalLayout {
         HorizontalLayout saveAndCancelButtons = new HorizontalLayout(saveUser, cancelUser);
         VerticalLayout formAndButtons = new VerticalLayout(firstname, lastname, email, group, saveAndCancelButtons);
         formAndButtons.setSpacing(false);
+        formAndButtons.setVisible(false);
 
         add(gridAndButtons, formAndButtons);
+
+        //binding
+        binder.bindInstanceFields(this);
+
         usersGrid.setItems(userService.getUsers());
         saveUser.addClickListener(event -> this.setVisible(false));
         cancelUser.addClickListener(event -> this.setVisible(false));
+
+        addUser.addClickListener(event -> {
+            formAndButtons.setVisible(true);
+            addUserFlag = true;
+        });
+        editUser.addClickListener(event -> {
+            setUser(usersGrid.asSingleSelect().getValue());
+            formAndButtons.setVisible(true);
+            editUserFlag = true;
+        });
+    }
+
+    public void setUser(User user) {
+        binder.setBean(user);
+
+        if(user == null) {
+            setVisible(false);
+        } else {
+            setVisible(true);
+            firstname.focus();
+        }
     }
 }

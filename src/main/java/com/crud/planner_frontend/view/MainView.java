@@ -60,6 +60,7 @@ public class MainView extends VerticalLayout {
         viewMeeting.setEnabled(false);
         editMeeting.setEnabled(false);
         deleteMeeting.setEnabled(false);
+        meetingsMainViewGrid.setEnabled(false);
     }
 
     public void viewMeeting() {
@@ -69,6 +70,7 @@ public class MainView extends VerticalLayout {
         viewMeeting.setEnabled(false);
         editMeeting.setEnabled(false);
         deleteMeeting.setEnabled(false);
+        meetingsMainViewGrid.setEnabled(false);
     }
 
     public void editMeeting() {
@@ -126,5 +128,9 @@ public class MainView extends VerticalLayout {
 
     public Button getDeleteMeeting() {
         return deleteMeeting;
+    }
+
+    public Grid<Meeting> getMeetingsMainViewGrid() {
+        return meetingsMainViewGrid;
     }
 }

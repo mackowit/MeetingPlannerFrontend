@@ -1,6 +1,7 @@
 package com.crud.planner_frontend.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Meeting {
@@ -17,7 +18,7 @@ public class Meeting {
         this.startDate = startDate;
         this.endDate = endDate;
         this.location = location;
-        this.participants = participants;
+        this.participants = new ArrayList<>();
     }
 
     public LocalDateTime getStartDate() {

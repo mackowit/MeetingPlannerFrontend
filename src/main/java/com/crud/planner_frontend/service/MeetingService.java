@@ -31,4 +31,8 @@ public class MeetingService {
         return exampleList;
     }
 
+    public void saveMeeting(Meeting meeting) {
+        System.out.println(meeting);
+    }
+
 }

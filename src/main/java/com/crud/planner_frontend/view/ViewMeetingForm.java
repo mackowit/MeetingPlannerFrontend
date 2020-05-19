@@ -64,6 +64,7 @@ public class ViewMeetingForm extends VerticalLayout {
                 mainView.getViewMeeting().setEnabled(true);
                 mainView.getEditMeeting().setEnabled(true);
                 mainView.getDeleteMeeting().setEnabled(true);
+                mainView.getMeetingsMainViewGrid().setEnabled(true);
             });
 
             //binding

@@ -1,9 +1,11 @@
 package com.crud.planner_frontend.view;
 
+import com.crud.planner_frontend.model.Group;
 import com.crud.planner_frontend.model.Location;
 import com.crud.planner_frontend.model.Meeting;
 import com.crud.planner_frontend.model.User;
 import com.crud.planner_frontend.service.LocationService;
+import com.crud.planner_frontend.service.MeetingService;
 import com.crud.planner_frontend.service.UserService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -12,6 +14,9 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NewMeetingForm extends VerticalLayout {
 
@@ -27,6 +32,7 @@ public class NewMeetingForm extends VerticalLayout {
     private Label participantsGridLabel = new Label("List of participants");
     private Grid<User> participants = new Grid<>(User.class);
 
+    private MeetingService meetingService = new MeetingService();
     private LocationService locationService = new LocationService();
     private UserService userService = new UserService();
 
@@ -43,9 +49,12 @@ public class NewMeetingForm extends VerticalLayout {
 
     private Binder<Meeting> binder = new Binder<>(Meeting.class);
 
+    private List<User> participantsToAddList = new ArrayList<>();
+
     public NewMeetingForm(MainView mainView) {
         location.setItems(locationService.getLocations());
-        participants.setItems(userService.getUsers());
+
+        participantPicker.setItems(userService.getUsers());
 
         //date and time
         HorizontalLayout startFields = new HorizontalLayout(startDate);
@@ -71,6 +80,14 @@ public class NewMeetingForm extends VerticalLayout {
         VerticalLayout participantsField = new VerticalLayout(participantsLabel, participantPicker, addParticipants);
         participants.setColumns("firstname", "lastname", "email");
         VerticalLayout participantsList = new VerticalLayout(participantsGridLabel, participants, removeParticipants);
+        addParticipants.addClickListener(event -> {
+            participantsToAddList.add(participantPicker.getValue());
+            participants.setItems(participantsToAddList);
+        });
+        removeParticipants.addClickListener(event -> {
+            participantsToAddList.remove(participants.asSingleSelect().getValue());
+            participants.setItems(participantsToAddList);
+        });
         HorizontalLayout usersFieldsAndButton = new HorizontalLayout(participantsField, participantsList, manageUsers);
         usersFieldsAndButton.setSpacing(false);
         HorizontalLayout selectUsers = new HorizontalLayout(usersFieldsAndButton, usersForm);
@@ -80,19 +97,23 @@ public class NewMeetingForm extends VerticalLayout {
 
         //general
         HorizontalLayout buttons = new HorizontalLayout(save, cancel);
-        save.addClickListener(event -> {
-            this.setVisible(false);
-            mainView.getAddNewMeeting().setEnabled(true);
-        });
-        cancel.addClickListener(event -> {
-            this.setVisible(false);
-            mainView.getAddNewMeeting().setEnabled(true);
-        });
+        add(formLabel, setStartAndEnd, selectLocation, selectUsers, buttons);
+        startDate.focus();
 
         //binding
         binder.bindInstanceFields(this);
 
-        add(formLabel, setStartAndEnd, selectLocation, selectUsers, buttons);
-        startDate.focus();
+        save.addClickListener(event -> {
+            this.setVisible(false);
+            mainView.getAddNewMeeting().setEnabled(true);
+            mainView.getMeetingsMainViewGrid().setEnabled(true);
+            Meeting meeting = binder.getBean();
+            meetingService.saveMeeting(meeting);
+        });
+        cancel.addClickListener(event -> {
+            this.setVisible(false);
+            mainView.getAddNewMeeting().setEnabled(true);
+            mainView.getMeetingsMainViewGrid().setEnabled(true);
+        });
     }
 }
