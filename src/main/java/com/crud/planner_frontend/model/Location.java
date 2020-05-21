@@ -1,6 +1,8 @@
 package com.crud.planner_frontend.model;
 
 public class Location {
+
+    private Long id;
     private String description;
     private String city;
     private String address;
@@ -12,6 +14,14 @@ public class Location {
         this.description = description;
         this.city = city;
         this.address = address;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getDescription() {

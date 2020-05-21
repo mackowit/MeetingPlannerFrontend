@@ -3,6 +3,8 @@ package com.crud.planner_frontend.model;
 import javax.validation.constraints.NotNull;
 
 public class User {
+
+    private Long id;
     private String firstname;
     private String lastname;
     private String email;
@@ -16,6 +18,14 @@ public class User {
         this.lastname = lastname;
         this.email = email;
         this.group = group;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFirstname() {

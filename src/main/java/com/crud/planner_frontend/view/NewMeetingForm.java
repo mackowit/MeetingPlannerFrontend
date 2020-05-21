@@ -1,6 +1,5 @@
 package com.crud.planner_frontend.view;
 
-import com.crud.planner_frontend.model.Group;
 import com.crud.planner_frontend.model.Location;
 import com.crud.planner_frontend.model.Meeting;
 import com.crud.planner_frontend.model.User;
@@ -107,7 +106,9 @@ public class NewMeetingForm extends VerticalLayout {
             this.setVisible(false);
             mainView.getAddNewMeeting().setEnabled(true);
             mainView.getMeetingsMainViewGrid().setEnabled(true);
-            Meeting meeting = binder.getBean();
+            //binder.bindInstanceFields(this);
+            Meeting meeting = bindingForm();
+            //Meeting meeting = binder.getBean();
             meetingService.saveMeeting(meeting);
         });
         cancel.addClickListener(event -> {
@@ -115,5 +116,14 @@ public class NewMeetingForm extends VerticalLayout {
             mainView.getAddNewMeeting().setEnabled(true);
             mainView.getMeetingsMainViewGrid().setEnabled(true);
         });
+    }
+
+    public Meeting bindingForm() {
+        Meeting meeting = new Meeting();
+        meeting.setStartDate(startDate.getValue());
+        meeting.setEndDate(endDate.getValue());
+        meeting.setLocation(location.getValue());
+        meeting.setParticipants(participantsToAddList);
+        return meeting;
     }
 }

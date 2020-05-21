@@ -6,6 +6,7 @@ import java.util.List;
 
 public class Meeting {
 
+    private Long id;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private Location location;
@@ -19,6 +20,14 @@ public class Meeting {
         this.endDate = endDate;
         this.location = location;
         this.participants = new ArrayList<>();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public LocalDateTime getStartDate() {

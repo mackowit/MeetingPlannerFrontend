@@ -29,24 +29,31 @@ public class UsersForm extends HorizontalLayout {
     private Button editUser = new Button("Edit");
     private Button deleteUser = new Button("Delete");
 
+    private Button manageGroups = new Button("Manage groups");
+
     boolean addUserFlag = false;
     boolean editUserFlag = false;
+
+    private GroupForm groupForm = new GroupForm();
 
     private UserService userService = new UserService();
 
     private Binder<User> binder = new Binder<>(User.class);
 
     public UsersForm() {
+        groupForm.setVisible(false);
         usersGrid.setColumns("firstname", "lastname", "email", "group");
         HorizontalLayout manageButtons = new HorizontalLayout(addUser, editUser, deleteUser);
         VerticalLayout gridAndButtons = new VerticalLayout(usersGrid, manageButtons);
         gridAndButtons.setSpacing(false);
         HorizontalLayout saveAndCancelButtons = new HorizontalLayout(saveUser, cancelUser);
-        VerticalLayout formAndButtons = new VerticalLayout(firstname, lastname, email, group, saveAndCancelButtons);
+        HorizontalLayout groupGridAndButton = new HorizontalLayout(group, manageGroups);
+        VerticalLayout formAndButtons = new VerticalLayout(firstname, lastname, email, groupGridAndButton, saveAndCancelButtons);
         formAndButtons.setSpacing(false);
         formAndButtons.setVisible(false);
+        manageGroups.addClickListener(event -> groupForm.setVisible(true));
 
-        add(gridAndButtons, formAndButtons);
+        add(gridAndButtons, formAndButtons, groupForm);
 
         //binding
         binder.bindInstanceFields(this);
