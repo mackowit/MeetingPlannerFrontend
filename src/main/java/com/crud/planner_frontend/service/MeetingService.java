@@ -3,7 +3,10 @@ package com.crud.planner_frontend.service;
 import com.crud.planner_frontend.model.Group;
 import com.crud.planner_frontend.model.Location;
 import com.crud.planner_frontend.model.Meeting;
+import com.crud.planner_frontend.view.LocalDateTimeAdapter;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -45,7 +48,12 @@ public class MeetingService {
 
     public void saveMeeting(Meeting meeting) {
         RestTemplate restTemplate = new RestTemplate();
-        Gson gson = new Gson();
+        /*Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
+        */
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .create();
         String jsonToSent = gson.toJson(meeting);
         System.out.println(meeting.getEndDate().toString());
         System.out.println(jsonToSent);
