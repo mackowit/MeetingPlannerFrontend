@@ -1,19 +1,24 @@
 package com.crud.planner_frontend.view;
 
+import com.crud.planner_frontend.gravatar.Gravatar;
+import com.crud.planner_frontend.gravatar.GravatarDefaultImage;
+import com.crud.planner_frontend.gravatar.GravatarRating;
 import com.crud.planner_frontend.model.Location;
 import com.crud.planner_frontend.model.Meeting;
 import com.crud.planner_frontend.model.User;
-import com.crud.planner_frontend.service.LocationService;
-import com.crud.planner_frontend.service.MeetingService;
-import com.crud.planner_frontend.service.UserService;
+import com.crud.planner_frontend.service.*;
+import com.crud.planner_frontend.weatherbit.WeatherBitForecast;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.server.StreamResource;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +39,10 @@ public class NewMeetingForm extends VerticalLayout {
     private MeetingService meetingService = new MeetingService();
     private LocationService locationService = new LocationService();
     private UserService userService = new UserService();
+    private WBService wbService = new WBService();
 
     private Button manageLocations = new Button("Manage locations");
+    private Button weatherForecast = new Button("Get weather forecast");
     private Button manageUsers = new Button("Manage users");
     private Button addParticipants = new Button("Add participant");
     private Button removeParticipants = new Button("Remove participant");
@@ -50,9 +57,12 @@ public class NewMeetingForm extends VerticalLayout {
 
     private List<User> participantsToAddList = new ArrayList<>();
 
+    private Image image = new Image("https://dummyimage.com/80x80/000/fff.jpg&text=Pick+participants", "avatar image");
+
+    private List<WeatherBitForecast> wBForecast = new ArrayList<>();
+
     public NewMeetingForm(MainView mainView) {
         location.setItems(locationService.getLocations());
-
         participantPicker.setItems(userService.getUsers());
 
         //date and time
@@ -67,21 +77,57 @@ public class NewMeetingForm extends VerticalLayout {
 
         //location
         locationForm.setVisible(false);
-        HorizontalLayout locationFieldAndButton = new HorizontalLayout(location, manageLocations);
-        HorizontalLayout locationFieldAndButtonAndForm = new HorizontalLayout(locationFieldAndButton, locationForm);
+        VerticalLayout locationButtons = new VerticalLayout(manageLocations, weatherForecast);
+        HorizontalLayout locationFieldAndButtons = new HorizontalLayout(location, locationButtons);
+        HorizontalLayout locationFieldAndButtonAndForm = new HorizontalLayout(locationFieldAndButtons, locationForm);
         VerticalLayout selectLocation = new VerticalLayout(locationLabel, locationFieldAndButtonAndForm);
         selectLocation.setSpacing(false);
         selectLocation.setSizeFull();
-        manageLocations.addClickListener(event -> locationForm.setVisible(true));
+
+        manageLocations.addClickListener(event -> {
+            locationForm.setVisible(true);
+        });
+
+        //weather forecast
+        Button closeForecast = new Button("Close forecast");
+        HorizontalLayout forecast = new HorizontalLayout();
+        VerticalLayout forecastAndButton = new VerticalLayout(forecast, closeForecast);
+        forecastAndButton.setVisible(false);
+        weatherForecast.addClickListener(event -> {
+            forecastAndButton.setVisible(true);
+            if(!location.isEmpty()) {
+                wBForecast = wbService.getWeatherForecast(location.getValue().getCity());
+                createWeatherForecastLayout(forecast, wBForecast);
+            } else {
+                weatherForecast.setEnabled(false);
+                forecast.add(new Label("To present weather forecast please select location"));
+            }
+        });
+        closeForecast.addClickListener(event -> {
+            forecast.removeAll();
+            forecastAndButton.setVisible(false);
+            weatherForecast.setEnabled(true);
+        });
 
         //users
+        Gravatar gravatar = new Gravatar();
+        gravatar.setSize(50);
+        gravatar.setRating(GravatarRating.GENERAL_AUDIENCES);
+        gravatar.setDefaultImage(GravatarDefaultImage.IDENTICON);
         usersForm.setVisible(false);
-        VerticalLayout participantsField = new VerticalLayout(participantsLabel, participantPicker, addParticipants);
+        image.setVisible(false);
+        VerticalLayout participantsField = new VerticalLayout(participantsLabel, participantPicker, addParticipants, image);
         participants.setColumns("firstname", "lastname", "email");
         VerticalLayout participantsList = new VerticalLayout(participantsGridLabel, participants, removeParticipants);
         addParticipants.addClickListener(event -> {
             participantsToAddList.add(participantPicker.getValue());
             participants.setItems(participantsToAddList);
+            byte[] jpg = gravatar.download(participantPicker.getValue().getEmail());
+            StreamResource resource = new StreamResource("avatar.jpg", () -> new ByteArrayInputStream(jpg));
+            participantsField.remove(image);
+            image = new Image(resource, "avatar");
+            participantsField.add(image);
+            image.setVisible(true);
         });
         removeParticipants.addClickListener(event -> {
             participantsToAddList.remove(participants.asSingleSelect().getValue());
@@ -96,7 +142,7 @@ public class NewMeetingForm extends VerticalLayout {
 
         //general
         HorizontalLayout buttons = new HorizontalLayout(save, cancel);
-        add(formLabel, setStartAndEnd, selectLocation, selectUsers, buttons);
+        add(formLabel, setStartAndEnd, selectLocation, forecastAndButton, selectUsers, buttons);
         startDate.focus();
 
         //binding
@@ -126,4 +172,16 @@ public class NewMeetingForm extends VerticalLayout {
         meeting.setParticipants(participantsToAddList);
         return meeting;
     }
+
+    public void createWeatherForecastLayout(HorizontalLayout forecast, List<WeatherBitForecast> wBForecast) {
+        for(int i = 0; i < wBForecast.size(); i++){
+            forecast.add(new VerticalLayout(
+                    new Label(wBForecast.get(i).getDatetime()),
+                    wbService.getWBIcon(wBForecast.get(i).getIcon()),
+                    new Label(wBForecast.get(i).getDescription()),
+                    new Label(wBForecast.get(i).getTemp())));
+        }
+        weatherForecast.setEnabled(false);
+    }
+
 }
