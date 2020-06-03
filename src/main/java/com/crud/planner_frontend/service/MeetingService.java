@@ -14,9 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MeetingService {
 
@@ -32,31 +33,13 @@ public class MeetingService {
         return Arrays.asList(exchange.getBody());
     }
 
-    public List<Meeting> meetingsExampleList() {
-        List<Meeting> exampleList = new ArrayList<>();
-        exampleList.add(new Meeting(
-                LocalDateTime.of(2020, 4, 30, 12, 0, 0),
-                LocalDateTime.of(2020, 4, 30, 13, 0, 0 ),
-                new Location("location1", "city1", "addres1"),
-                null));
-        exampleList.add(new Meeting(LocalDateTime.of(2020, 4, 30, 12, 0, 0),
-                LocalDateTime.of(2020, 4, 30, 13, 0, 0 ),
-                new Location("location2", "city2", "addres2"),
-                null));
-        return exampleList;
-    }
-
     public void saveMeeting(Meeting meeting) {
         RestTemplate restTemplate = new RestTemplate();
-        /*Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss").create();
-        */
         Gson gson = new GsonBuilder()
                 .setPrettyPrinting()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .create();
         String jsonToSent = gson.toJson(meeting);
-        System.out.println(meeting.getEndDate().toString());
-        System.out.println(jsonToSent);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, "application/json");
         HttpEntity httpEntity = new HttpEntity(jsonToSent, httpHeaders);
@@ -67,4 +50,28 @@ public class MeetingService {
                 Void.class);
     }
 
+    public void updateMeeting(Meeting meeting) {
+        RestTemplate restTemplate = new RestTemplate();
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .create();
+        String jsonToSent = gson.toJson(meeting);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(HttpHeaders.CONTENT_TYPE, "application/json");
+        HttpEntity httpEntity = new HttpEntity(jsonToSent, httpHeaders);
+        ResponseEntity exchange = restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                httpEntity,
+                Void.class);
+        System.out.println(exchange);
+    }
+
+    public void deleteMeeting(Long id) {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("meetingId", id.toString());
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.delete(url + "/{meetingId}" ,  params);
+    }
 }

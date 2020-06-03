@@ -29,7 +29,7 @@ public class GroupForm extends VerticalLayout {
 
     Binder<Group> binder = new Binder(Group.class);
 
-    public GroupForm() {
+    public GroupForm(UsersForm usersForm) {
         groupGrid.setColumns("name");
         HorizontalLayout manageButtons = new HorizontalLayout(addGroup, editGroup, deleteGroup, cancelManage);
         VerticalLayout gridAndButtons = new VerticalLayout(manageGroupLabel, groupGrid, manageButtons);
@@ -61,6 +61,7 @@ public class GroupForm extends VerticalLayout {
             }
             name.clear();
             groupGrid.setItems(groupService.getGroups());
+            usersForm.refresh();
         });
         //deleting group
         deleteGroup.addClickListener(event -> {

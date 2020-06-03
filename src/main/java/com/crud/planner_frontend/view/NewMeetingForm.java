@@ -15,6 +15,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.server.StreamResource;
 
@@ -22,9 +23,10 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewMeetingForm extends VerticalLayout {
+public class NewMeetingForm extends VerticalLayout implements MeetingForm {
 
     private Label formLabel = new Label("New meeting");
+    private TextField topic = new TextField("Meeting topic");
     private Label startLabel = new Label("Set start date and time");
     private Label endLabel = new Label("Set end date and time");
     private LocalDateTimeField startDate = new LocalDateTimeField();
@@ -35,6 +37,7 @@ public class NewMeetingForm extends VerticalLayout {
     private ComboBox<User> participantPicker = new ComboBox<>("Participants");
     private Label participantsGridLabel = new Label("List of participants");
     private Grid<User> participants = new Grid<>(User.class);
+    private TextField content = new TextField("Message content");
 
     private MeetingService meetingService = new MeetingService();
     private LocationService locationService = new LocationService();
@@ -50,8 +53,8 @@ public class NewMeetingForm extends VerticalLayout {
     private Button save = new Button("Save");
     private Button cancel = new Button("Cancel");
 
-    private LocationForm locationForm = new LocationForm();
-    private UsersForm usersForm = new UsersForm();
+    private LocationForm locationForm = new LocationForm(this);
+    private UsersForm usersForm = new UsersForm(this);
 
     private Binder<Meeting> binder = new Binder<>(Meeting.class);
 
@@ -62,8 +65,7 @@ public class NewMeetingForm extends VerticalLayout {
     private List<WeatherBitForecast> wBForecast = new ArrayList<>();
 
     public NewMeetingForm(MainView mainView) {
-        location.setItems(locationService.getLocations());
-        participantPicker.setItems(userService.getUsers());
+        refresh();
 
         //date and time
         HorizontalLayout startFields = new HorizontalLayout(startDate);
@@ -142,7 +144,7 @@ public class NewMeetingForm extends VerticalLayout {
 
         //general
         HorizontalLayout buttons = new HorizontalLayout(save, cancel);
-        add(formLabel, setStartAndEnd, selectLocation, forecastAndButton, selectUsers, buttons);
+        add(formLabel, topic, setStartAndEnd, selectLocation, forecastAndButton, selectUsers, content, buttons);
         startDate.focus();
 
         //binding
@@ -152,10 +154,9 @@ public class NewMeetingForm extends VerticalLayout {
             this.setVisible(false);
             mainView.getAddNewMeeting().setEnabled(true);
             mainView.getMeetingsMainViewGrid().setEnabled(true);
-            //binder.bindInstanceFields(this);
             Meeting meeting = bindingForm();
-            //Meeting meeting = binder.getBean();
             meetingService.saveMeeting(meeting);
+            mainView.refresh();
         });
         cancel.addClickListener(event -> {
             this.setVisible(false);
@@ -166,10 +167,12 @@ public class NewMeetingForm extends VerticalLayout {
 
     public Meeting bindingForm() {
         Meeting meeting = new Meeting();
+        meeting.setTopic(topic.getValue());
         meeting.setStartDate(startDate.getValue());
         meeting.setEndDate(endDate.getValue());
         meeting.setLocation(location.getValue());
         meeting.setParticipants(participantsToAddList);
+        meeting.setContent(content.getValue());
         return meeting;
     }
 
@@ -182,6 +185,12 @@ public class NewMeetingForm extends VerticalLayout {
                     new Label(wBForecast.get(i).getTemp())));
         }
         weatherForecast.setEnabled(false);
+    }
+
+    @Override
+    public void refresh() {
+        location.setItems(locationService.getLocations());
+        participantPicker.setItems(userService.getUsers());
     }
 
 }

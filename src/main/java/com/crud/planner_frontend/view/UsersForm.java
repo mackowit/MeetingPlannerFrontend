@@ -4,6 +4,7 @@ import com.crud.planner_frontend.model.Group;
 import com.crud.planner_frontend.model.Location;
 import com.crud.planner_frontend.model.Meeting;
 import com.crud.planner_frontend.model.User;
+import com.crud.planner_frontend.service.GroupService;
 import com.crud.planner_frontend.service.LocationService;
 import com.crud.planner_frontend.service.UserService;
 import com.vaadin.flow.component.button.Button;
@@ -28,23 +29,25 @@ public class UsersForm extends HorizontalLayout {
     private Button addUser = new Button("Add");
     private Button editUser = new Button("Edit");
     private Button deleteUser = new Button("Delete");
+    private Button cancelForm = new Button("Cancel");
 
     private Button manageGroups = new Button("Manage groups");
 
     boolean addUserFlag = false;
     boolean editUserFlag = false;
 
-    private GroupForm groupForm = new GroupForm();
+    private GroupForm groupForm = new GroupForm(this);
 
     private UserService userService = new UserService();
 
     private Binder<User> binder = new Binder<>(User.class);
 
-    public UsersForm() {
+    public UsersForm(MeetingForm meetingForm) {
         groupForm.setVisible(false);
         usersGrid.setColumns("firstname", "lastname", "email", "group");
-        HorizontalLayout manageButtons = new HorizontalLayout(addUser, editUser, deleteUser);
-        VerticalLayout gridAndButtons = new VerticalLayout(usersGrid, manageButtons);
+        refresh();
+        HorizontalLayout manageButtons = new HorizontalLayout(addUser, editUser, deleteUser, cancelForm);
+        VerticalLayout gridAndButtons = new VerticalLayout(manageUsersLabel, usersGrid, manageButtons);
         gridAndButtons.setSpacing(false);
         HorizontalLayout saveAndCancelButtons = new HorizontalLayout(saveUser, cancelUser);
         HorizontalLayout groupGridAndButton = new HorizontalLayout(group, manageGroups);
@@ -58,29 +61,78 @@ public class UsersForm extends HorizontalLayout {
         //binding
         binder.bindInstanceFields(this);
 
-        usersGrid.setItems(userService.getUsers());
-        saveUser.addClickListener(event -> this.setVisible(false));
-        cancelUser.addClickListener(event -> this.setVisible(false));
+        saveUser.addClickListener(event -> {
+            formAndButtons.setVisible(false);
+            User user = bindingForm();
+            if(addUserFlag) {
+                user.setId(null);
+                userService.saveUser(user);
+            }
+            if(editUserFlag) {
+                user.setId(binder.getBean().getId());
+                userService.updateUser(user);
+            }
+            formClear();
+            refresh();
+            meetingForm.refresh();
+        });
+        cancelUser.addClickListener(event -> {
+            formAndButtons.setVisible(false);
+            formClear();
+            refresh();
+        });
 
         addUser.addClickListener(event -> {
             formAndButtons.setVisible(true);
+            editUserFlag = false;
             addUserFlag = true;
         });
         editUser.addClickListener(event -> {
-            setUser(usersGrid.asSingleSelect().getValue());
-            formAndButtons.setVisible(true);
-            editUserFlag = true;
+            if(setUser(usersGrid.asSingleSelect().getValue())) {
+                formAndButtons.setVisible(true);
+                addUserFlag = false;
+                editUserFlag = true;
+            }
+        });
+        deleteUser.addClickListener(event -> {
+            if(setUser(usersGrid.asSingleSelect().getValue())) {
+                userService.deleteUser(binder.getBean().getId());
+                refresh();
+            }
+        });
+        cancelForm.addClickListener(event -> {
+            this.setVisible(false);
+            formClear();
         });
     }
 
-    public void setUser(User user) {
+    public boolean setUser(User user) {
         binder.setBean(user);
-
         if(user == null) {
-            setVisible(false);
+            return false;
         } else {
-            setVisible(true);
             firstname.focus();
+            return true;
         }
+    }
+
+    public User bindingForm() {
+        User user = new User();
+        user.setFirstname(firstname.getValue());
+        user.setLastname(lastname.getValue());
+        user.setEmail(email.getValue());
+        user.setGroup(group.getValue());
+        return user;
+    }
+
+    public void formClear() {
+        firstname.clear();
+        lastname.clear();
+        email.clear();
+        group.clear();
+    }
+
+    public void refresh() {
+        usersGrid.setItems(userService.getUsers());
     }
 }

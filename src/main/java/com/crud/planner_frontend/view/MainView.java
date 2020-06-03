@@ -9,7 +9,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-
 @Route
 public class MainView extends VerticalLayout {
     private Label mainLabel = new Label("Meeting planner");
@@ -21,7 +20,7 @@ public class MainView extends VerticalLayout {
     private Button addNewMeeting = new Button("Add new meeting");
     private Button viewMeeting = new Button("View meeting");
     private Button editMeeting = new Button("Edit meeting");
-    private Button deleteMeeting = new Button("Cancel meeting");
+    private Button cancelMeeting = new Button("Cancel meeting");
 
     private NewMeetingForm newMeetingForm = new NewMeetingForm(this);
     private ViewMeetingForm viewMeetingForm = new ViewMeetingForm(this);
@@ -31,12 +30,12 @@ public class MainView extends VerticalLayout {
         newMeetingForm.setVisible(false);
         viewMeetingForm.setVisible(false);
         editMeetingForm.setVisible(false);
-        meetingsMainViewGrid.setColumns("startDate", "endDate", "location");
+        meetingsMainViewGrid.setColumns("topic", "startDate", "endDate", "location");
         viewMeeting.setEnabled(false);
         editMeeting.setEnabled(false);
-        deleteMeeting.setEnabled(false);
+        cancelMeeting.setEnabled(false);
 
-        HorizontalLayout buttonBar = new HorizontalLayout(addNewMeeting, viewMeeting, editMeeting, deleteMeeting);
+        HorizontalLayout buttonBar = new HorizontalLayout(addNewMeeting, viewMeeting, editMeeting, cancelMeeting);
         VerticalLayout mainContent = new VerticalLayout(meetingLabel, meetingsMainViewGrid, buttonBar);
         mainContent.setSizeFull();
         mainContent.getStyle().set("border", "1px solid black");
@@ -46,11 +45,12 @@ public class MainView extends VerticalLayout {
         addNewMeeting.addClickListener(event -> addMeeting());
         viewMeeting.addClickListener(event -> viewMeeting());
         editMeeting.addClickListener(event -> editMeeting());
+        cancelMeeting.addClickListener(event -> cancelConfirmationLayout(this));
 
         meetingsMainViewGrid.asSingleSelect().addValueChangeListener(event -> {
             viewMeeting.setEnabled(true);
             editMeeting.setEnabled(true);
-            deleteMeeting.setEnabled(true);
+            cancelMeeting.setEnabled(true);
         });
     }
 
@@ -59,7 +59,7 @@ public class MainView extends VerticalLayout {
         addNewMeeting.setEnabled(false);
         viewMeeting.setEnabled(false);
         editMeeting.setEnabled(false);
-        deleteMeeting.setEnabled(false);
+        cancelMeeting.setEnabled(false);
         meetingsMainViewGrid.setEnabled(false);
     }
 
@@ -69,7 +69,7 @@ public class MainView extends VerticalLayout {
         addNewMeeting.setEnabled(false);
         viewMeeting.setEnabled(false);
         editMeeting.setEnabled(false);
-        deleteMeeting.setEnabled(false);
+        cancelMeeting.setEnabled(false);
         meetingsMainViewGrid.setEnabled(false);
     }
 
@@ -79,40 +79,35 @@ public class MainView extends VerticalLayout {
         addNewMeeting.setEnabled(false);
         viewMeeting.setEnabled(false);
         editMeeting.setEnabled(false);
-        deleteMeeting.setEnabled(false);
+        cancelMeeting.setEnabled(false);
     }
 
-    /*public void setAddingNewMeeting(boolean addingNewMeeting) {
-        isAddingNewMeeting = addingNewMeeting;
+    public void cancelMeeting() {
+        Meeting meetingToCancel = meetingsMainViewGrid.asSingleSelect().getValue();
+        meetingService.deleteMeeting(meetingToCancel.getId());
+        refresh();
     }
 
-    public void setUpdatingMeeting(boolean updatingMeeting) {
-        isUpdatingMeeting = updatingMeeting;
-    }*/
-
-    /*private void listLocations() {
-       // List<Location> locationsList = exampleData();
-        List<Location> locationsList = getLocations();
-        grid.setItems(locationsList);
+    public void refresh() {
+        meetingsMainViewGrid.setItems(meetingService.getMeetings());
     }
 
-    private List<Location> exampleData() {
-        List<Location> locationsList = new ArrayList<>();
-        locationsList.add(new Location("description1", "city1", "addres1"));
-        locationsList.add(new Location("description2", "city2", "addres2"));
-        locationsList.add(new Location("description3", "city3", "addres3"));
-        return locationsList;
-    }
+    public void cancelConfirmationLayout(MainView mainView) {
+        Label confirmationLabel = new Label("Are you sure you want to cancel this meeting?");
+        Button yesButton = new Button("Yes");
+        Button noButton = new Button("No");
+        HorizontalLayout confirmationButtons = new HorizontalLayout(yesButton, noButton);
+        VerticalLayout confirmation = new VerticalLayout(confirmationLabel, confirmationButtons);
+        mainView.add(confirmation);
+        yesButton.addClickListener(event -> {
+            cancelMeeting();
+            mainView.remove(confirmation);
+        });
+        noButton.addClickListener(event -> {
+            mainView.remove(confirmation);
+        });
 
-    public List<Location> getLocations() {
-        RestTemplate rest = new RestTemplate();
-        ResponseEntity<Location[]> exchange = rest.exchange(
-                "http://localhost:8080/v1/planner/location",
-                HttpMethod.GET,
-                HttpEntity.EMPTY,
-                Location[].class);
-        return Arrays.asList(exchange.getBody());
-    }*/
+    }
 
     public Button getAddNewMeeting() {
         return addNewMeeting;
@@ -127,7 +122,7 @@ public class MainView extends VerticalLayout {
     }
 
     public Button getDeleteMeeting() {
-        return deleteMeeting;
+        return cancelMeeting;
     }
 
     public Grid<Meeting> getMeetingsMainViewGrid() {

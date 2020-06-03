@@ -4,24 +4,21 @@ import com.crud.planner_frontend.model.Group;
 import com.crud.planner_frontend.model.Location;
 import com.crud.planner_frontend.model.Meeting;
 import com.crud.planner_frontend.model.User;
+import com.google.gson.Gson;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class UserService {
 
     final static String url = "http://localhost:8080/v1/planner/users";
 
     public List<User> getUsers() {
-        /*List<Location> locationList = new ArrayList<>();
-        locationList = locationsExampleList();
-        return locationList;*/
         RestTemplate rest = new RestTemplate();
         ResponseEntity<User[]> exchange = rest.exchange(
                 url,
@@ -31,11 +28,43 @@ public class UserService {
         return Arrays.asList(exchange.getBody());
     }
 
-    public List<User> usersExampleList() {
-        List<User> exampleList = new ArrayList<>();
-        exampleList.add(new User("firstname1", "lastname1", "email1", new Group("group1")));
-        exampleList.add(new User("firstname2", "lastname2", "email2", new Group("group1")));
-        return exampleList;
+    public void saveUser(User user) {
+        RestTemplate restTemplate = new RestTemplate();
+        Gson gson = new Gson();
+        String jsonToSent = gson.toJson(user);
+        System.out.println(jsonToSent);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(HttpHeaders.CONTENT_TYPE, "application/json");
+        HttpEntity httpEntity = new HttpEntity(jsonToSent, httpHeaders);
+        ResponseEntity exchange = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                httpEntity,
+                Void.class);
+        System.out.println(exchange);
+    }
+
+    public void updateUser(User user) {
+        RestTemplate restTemplate = new RestTemplate();
+        Gson gson = new Gson();
+        String jsonToSent = gson.toJson(user);
+        System.out.println(jsonToSent);
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(HttpHeaders.CONTENT_TYPE, "application/json");
+        HttpEntity httpEntity = new HttpEntity(jsonToSent, httpHeaders);
+        ResponseEntity exchange = restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                httpEntity,
+                Void.class);
+        System.out.println(exchange);
+    }
+
+    public void deleteUser(Long id) {
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("userId", id.toString());
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.delete(url + "/{userId}" ,  params);
     }
 
 }
