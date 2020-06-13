@@ -1,5 +1,6 @@
 package com.crud.planner_frontend.view;
 
+import com.crud.planner_frontend.gravatar.GravatarDefaultImage;
 import com.crud.planner_frontend.model.Group;
 import com.crud.planner_frontend.model.Location;
 import com.crud.planner_frontend.model.Meeting;
@@ -22,7 +23,7 @@ public class UsersForm extends HorizontalLayout {
     private Grid<User> usersGrid = new Grid<>(User.class);
     private TextField firstname = new TextField("First name");
     private TextField lastname = new TextField("Last name");
-    private TextField email = new TextField("email");
+    private TextField email = new TextField("E-mail");
     private ComboBox<Group> group = new ComboBox<>("Group of users");
     private Button saveUser = new Button("Save");
     private Button cancelUser = new Button("Cancel");
@@ -39,6 +40,7 @@ public class UsersForm extends HorizontalLayout {
     private GroupForm groupForm = new GroupForm(this);
 
     private UserService userService = new UserService();
+    private GroupService groupService = new GroupService();
 
     private Binder<User> binder = new Binder<>(User.class);
 
@@ -134,5 +136,6 @@ public class UsersForm extends HorizontalLayout {
 
     public void refresh() {
         usersGrid.setItems(userService.getUsers());
+        group.setItems(groupService.getGroups());
     }
 }

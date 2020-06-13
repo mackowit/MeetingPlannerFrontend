@@ -17,7 +17,6 @@ import java.util.List;
 
 public class WBService {
     final static String url = "https://api.weatherbit.io/v2.0/forecast/daily?";
-    //https://api.weatherbit.io/v2.0/forecast/daily?city=Raleigh,NC&key=API_KEY
 
     public List<WeatherBitForecast> getWeatherForecast(String city) {
         List<WeatherBitForecast> wBForecast = new ArrayList<>();
@@ -37,7 +36,7 @@ public class WBService {
                         weather.getAsJsonObject().get("description").getAsString(),
                         arr.get(i).getAsJsonObject().get("temp").getAsString()));
         }
-        System.out.println(wBForecast);
+        //System.out.println(wBForecast);
         return wBForecast;
     }
 

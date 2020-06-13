@@ -6,10 +6,7 @@ import com.crud.planner_frontend.gravatar.GravatarRating;
 import com.crud.planner_frontend.model.Location;
 import com.crud.planner_frontend.model.Meeting;
 import com.crud.planner_frontend.model.User;
-import com.crud.planner_frontend.service.LocationService;
-import com.crud.planner_frontend.service.MeetingService;
-import com.crud.planner_frontend.service.UserService;
-import com.crud.planner_frontend.service.WBService;
+import com.crud.planner_frontend.service.*;
 import com.crud.planner_frontend.weatherbit.WeatherBitForecast;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -46,6 +43,7 @@ public class EditMeetingForm extends VerticalLayout implements MeetingForm {
         private LocationService locationService = new LocationService();
         private UserService userService = new UserService();
         private WBService wbService = new WBService();
+        private GravatarService gravatarService = new GravatarService();
 
         private Button manageLocations = new Button("Manage locations");
         private Button weatherForecast = new Button("Get weather forecast");
@@ -112,10 +110,6 @@ public class EditMeetingForm extends VerticalLayout implements MeetingForm {
             });
 
             //users
-            Gravatar gravatar = new Gravatar();
-            gravatar.setSize(50);
-            gravatar.setRating(GravatarRating.GENERAL_AUDIENCES);
-            gravatar.setDefaultImage(GravatarDefaultImage.IDENTICON);
             usersForm.setVisible(false);
             image.setVisible(false);
             VerticalLayout participantsField = new VerticalLayout(participantsLabel, participantPicker, addParticipants, image);
@@ -124,10 +118,8 @@ public class EditMeetingForm extends VerticalLayout implements MeetingForm {
             addParticipants.addClickListener(event -> {
                 participantsToAddList.add(participantPicker.getValue());
                 participants.setItems(participantsToAddList);
-                byte[] jpg = gravatar.download(participantPicker.getValue().getEmail());
-                StreamResource resource = new StreamResource("avatar.jpg", () -> new ByteArrayInputStream(jpg));
                 participantsField.remove(image);
-                image = new Image(resource, "avatar");
+                image = gravatarService.getImage(participantPicker.getValue().getEmail());
                 participantsField.add(image);
                 image.setVisible(true);
             });
