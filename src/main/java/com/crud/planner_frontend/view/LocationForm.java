@@ -33,6 +33,7 @@ public class LocationForm extends HorizontalLayout {
     private Binder<Location> binder = new Binder<>(Location.class);
 
     public LocationForm(MeetingForm meetingForm) {
+        deleteLocation.setEnabled(false);
         locationGrid.setColumns("description", "city", "address");
         HorizontalLayout manageButtons = new HorizontalLayout(addLocation, editLocation, deleteLocation);
         VerticalLayout gridAndButtons = new VerticalLayout(manageLocationLabel, locationGrid, manageButtons);

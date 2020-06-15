@@ -12,11 +12,11 @@ public class GravatarService {
 
     private Gravatar gravatar = new Gravatar();
 
-    public Image getImage(String email) {
-        gravatar.setSize(50);
-        gravatar.setRating(GravatarRating.GENERAL_AUDIENCES);
-        gravatar.setDefaultImage(GravatarDefaultImage.MONSTERID);
-        byte[] jpg = gravatar.download(email);
+    public Image getGravatarImage(String rating, String defaultImage, int size, String mail) {
+        gravatar.setSize(size);
+        gravatar.setDefaultImage(GravatarDefaultImage.valueOf(defaultImage));
+        gravatar.setRating(GravatarRating.valueOf(rating));
+        byte[] jpg = gravatar.download(mail);
         StreamResource resource = new StreamResource("avatar.jpg", () -> new ByteArrayInputStream(jpg));
         return new Image(resource, "avatar");
     }

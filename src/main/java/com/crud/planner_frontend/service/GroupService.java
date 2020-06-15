@@ -1,6 +1,7 @@
 package com.crud.planner_frontend.service;
 
 import com.crud.planner_frontend.model.Group;
+import com.crud.planner_frontend.model.User;
 import com.google.gson.Gson;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,9 +13,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class GroupService {
 
+    private UserService userService = new UserService();
     final static String url = "http://localhost:8080/v1/planner/groups";
 
     public List<Group> getGroups() {
@@ -59,10 +62,19 @@ public class GroupService {
         System.out.println(exchange);
     }
 
-    public void deleteGroup(Long id) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("groupId", id.toString());
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.delete(url + "/{groupId}" ,  params);
+    public boolean deleteGroup(Long id) {
+        List<User> usersList = userService.getUsers();
+        List<User> usersListGroupFiltered = usersList.stream()
+                .filter(user -> user.getGroup().getId().equals(id))
+                .collect(Collectors.toList());
+        if (usersListGroupFiltered.size() > 0) {
+            return false;
+        } else {
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("groupId", id.toString());
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.delete(url + "/{groupId}", params);
+            return true;
+        }
     }
 }

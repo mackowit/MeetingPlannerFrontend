@@ -1,8 +1,5 @@
 package com.crud.planner_frontend.view;
 
-import com.crud.planner_frontend.gravatar.Gravatar;
-import com.crud.planner_frontend.gravatar.GravatarDefaultImage;
-import com.crud.planner_frontend.gravatar.GravatarRating;
 import com.crud.planner_frontend.model.Location;
 import com.crud.planner_frontend.model.Meeting;
 import com.crud.planner_frontend.model.User;
@@ -15,11 +12,10 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.server.StreamResource;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,10 +30,13 @@ public class EditMeetingForm extends VerticalLayout implements MeetingForm {
         private Label locationLabel = new Label("Select location");
         private ComboBox<Location> location = new ComboBox<>();
         private Label participantsLabel = new Label("Select participants");
+        private Label nameLabel = new Label();
+        private Label mailLabel = new Label();
+        private Label groupLabel = new Label();
         private ComboBox<User> participantPicker = new ComboBox<>("Participants");
         private Label participantsGridLabel = new Label("List of participants");
         private Grid<User> participants = new Grid<>(User.class);
-        private TextField content = new TextField("Message content");
+        private TextArea content = new TextArea("Message content");
 
         private MeetingService meetingService = new MeetingService();
         private LocationService locationService = new LocationService();
@@ -112,21 +111,29 @@ public class EditMeetingForm extends VerticalLayout implements MeetingForm {
             //users
             usersForm.setVisible(false);
             image.setVisible(false);
-            VerticalLayout participantsField = new VerticalLayout(participantsLabel, participantPicker, addParticipants, image);
+            VerticalLayout participantsCard = new VerticalLayout(image, nameLabel, mailLabel, groupLabel);
+            VerticalLayout participantsField = new VerticalLayout(participantsLabel, participantPicker, participantsCard, addParticipants);
             participants.setColumns("firstname", "lastname", "email");
             VerticalLayout participantsList = new VerticalLayout(participantsGridLabel, participants, removeParticipants);
             addParticipants.addClickListener(event -> {
                 participantsToAddList.add(participantPicker.getValue());
                 participants.setItems(participantsToAddList);
-                participantsField.remove(image);
-                image = gravatarService.getImage(participantPicker.getValue().getEmail());
-                participantsField.add(image);
+            });
+            participantPicker.addValueChangeListener(event -> {
+                participantsCard.remove(image);
+                image = gravatarService.getGravatarImage("GENERAL_AUDIENCES", "MONSTERID", 80, participantPicker.getValue().getEmail());
+                nameLabel.setText(participantPicker.getValue().toString());
+                mailLabel.setText(participantPicker.getValue().getEmail());
+                groupLabel.setText(participantPicker.getValue().getGroup().getName());
+                participantsCard.setAlignItems(Alignment.CENTER);
+                participantsCard.add(image);
                 image.setVisible(true);
             });
             removeParticipants.addClickListener(event -> {
                 participantsToAddList.remove(participants.asSingleSelect().getValue());
                 participants.setItems(participantsToAddList);
             });
+            manageUsers.setWidthFull();
             HorizontalLayout usersFieldsAndButton = new HorizontalLayout(participantsField, participantsList, manageUsers);
             usersFieldsAndButton.setSpacing(false);
             HorizontalLayout selectUsers = new HorizontalLayout(usersFieldsAndButton, usersForm);

@@ -66,8 +66,9 @@ public class GroupForm extends VerticalLayout {
         //deleting group
         deleteGroup.addClickListener(event -> {
             setGroup(groupGrid.asSingleSelect().getValue());
-            groupService.deleteGroup(binder.getBean().getId());
+            if(groupService.deleteGroup(binder.getBean().getId()))
             groupGrid.setItems(groupService.getGroups());
+            else groupDeletingDenial(binder.getBean());
         });
         //canceling editing form
         cancelGroup.addClickListener(event -> formAndButtons.setVisible(false));
@@ -95,5 +96,26 @@ public class GroupForm extends VerticalLayout {
             setVisible(true);
             name.focus();
         }
+    }
+
+    public void groupDeletingDenial(Group group) {
+        saveGroup.setEnabled(false);
+        editGroup.setEnabled(false);
+        deleteGroup.setEnabled(false);
+        cancelManage.setEnabled(false);
+        cancelGroup.setEnabled(false);
+        addGroup.setEnabled(false);
+        Label deleteDenialLabel = new Label("Users assigned to " + group.getName() + " exists, so it cannot be deleted");
+        Button deleteDenialLabelConfirmation = new Button("OK");
+        this.add(deleteDenialLabel, deleteDenialLabelConfirmation);
+        deleteDenialLabelConfirmation.addClickListener(event -> {
+           this.remove(deleteDenialLabel, deleteDenialLabelConfirmation);
+            saveGroup.setEnabled(true);
+            editGroup.setEnabled(true);
+            deleteGroup.setEnabled(true);
+            cancelManage.setEnabled(true);
+            cancelGroup.setEnabled(true);
+            addGroup.setEnabled(true);
+        });
     }
 }

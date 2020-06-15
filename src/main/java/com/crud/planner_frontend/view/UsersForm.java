@@ -45,6 +45,7 @@ public class UsersForm extends HorizontalLayout {
     private Binder<User> binder = new Binder<>(User.class);
 
     public UsersForm(MeetingForm meetingForm) {
+        deleteUser.setEnabled(false);
         groupForm.setVisible(false);
         usersGrid.setColumns("firstname", "lastname", "email", "group");
         refresh();
