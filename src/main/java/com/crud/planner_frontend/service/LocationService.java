@@ -10,12 +10,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LocationService {
 
     final static String url = "http://localhost:8080/v1/planner/location";
+
+    private MeetingService meetingService = new MeetingService();
 
     public List<Location> getLocations() {
         RestTemplate rest = new RestTemplate();
@@ -59,10 +61,19 @@ public class LocationService {
         System.out.println(exchange);
     }
 
-    public void deleteLocation(Long id) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("locationId", id.toString());
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.delete(url + "/{locationId}" ,  params);
+    public boolean deleteLocation(Long id) {
+        List<Meeting> meetingsList = meetingService.getMeetings();
+        List<Meeting> meetingsListLocationFiltered = meetingsList.stream()
+                .filter(meeting -> meeting.getLocation().getId().equals(id))
+                .collect(Collectors.toList());
+        if (meetingsListLocationFiltered.size() > 0) {
+            return false;
+        } else {
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("locationId", id.toString());
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.delete(url + "/{locationId}", params);
+            return true;
+        }
     }
 }

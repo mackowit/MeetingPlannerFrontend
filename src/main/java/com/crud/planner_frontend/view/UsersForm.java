@@ -1,12 +1,8 @@
 package com.crud.planner_frontend.view;
 
-import com.crud.planner_frontend.gravatar.GravatarDefaultImage;
 import com.crud.planner_frontend.model.Group;
-import com.crud.planner_frontend.model.Location;
-import com.crud.planner_frontend.model.Meeting;
 import com.crud.planner_frontend.model.User;
 import com.crud.planner_frontend.service.GroupService;
-import com.crud.planner_frontend.service.LocationService;
 import com.crud.planner_frontend.service.UserService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -45,7 +41,7 @@ public class UsersForm extends HorizontalLayout {
     private Binder<User> binder = new Binder<>(User.class);
 
     public UsersForm(MeetingForm meetingForm) {
-        deleteUser.setEnabled(false);
+        //deleteUser.setEnabled(false);
         groupForm.setVisible(false);
         usersGrid.setColumns("firstname", "lastname", "email", "group");
         refresh();
@@ -99,8 +95,8 @@ public class UsersForm extends HorizontalLayout {
         });
         deleteUser.addClickListener(event -> {
             if(setUser(usersGrid.asSingleSelect().getValue())) {
-                userService.deleteUser(binder.getBean().getId());
-                refresh();
+                if(userService.deleteUser(binder.getBean().getId())) refresh();
+                else userDeletingDenial(binder.getBean());
             }
         });
         cancelForm.addClickListener(event -> {
@@ -138,5 +134,28 @@ public class UsersForm extends HorizontalLayout {
     public void refresh() {
         usersGrid.setItems(userService.getUsers());
         group.setItems(groupService.getGroups());
+    }
+
+    public void userDeletingDenial(User user) {
+        saveUser.setEnabled(false);
+        editUser.setEnabled(false);
+        deleteUser.setEnabled(false);
+        cancelUser.setEnabled(false);
+        cancelForm.setEnabled(false);
+        addUser.setEnabled(false);
+        manageGroups.setEnabled(false);
+        Label deleteDenialLabel = new Label("User " + user.getEmail() + " is assigned to meetings, so it cannot be deleted");
+        Button deleteDenialLabelConfirmation = new Button("OK");
+        this.add(deleteDenialLabel, deleteDenialLabelConfirmation);
+        deleteDenialLabelConfirmation.addClickListener(event -> {
+            this.remove(deleteDenialLabel, deleteDenialLabelConfirmation);
+            saveUser.setEnabled(true);
+            editUser.setEnabled(true);
+            deleteUser.setEnabled(true);
+            cancelUser.setEnabled(true);
+            cancelForm.setEnabled(true);
+            addUser.setEnabled(true);
+            manageGroups.setEnabled(true);
+        });
     }
 }

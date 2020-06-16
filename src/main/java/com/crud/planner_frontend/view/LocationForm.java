@@ -1,7 +1,6 @@
 package com.crud.planner_frontend.view;
 
 import com.crud.planner_frontend.model.Location;
-import com.crud.planner_frontend.model.User;
 import com.crud.planner_frontend.service.LocationService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
@@ -33,9 +32,8 @@ public class LocationForm extends HorizontalLayout {
     private Binder<Location> binder = new Binder<>(Location.class);
 
     public LocationForm(MeetingForm meetingForm) {
-        deleteLocation.setEnabled(false);
         locationGrid.setColumns("description", "city", "address");
-        HorizontalLayout manageButtons = new HorizontalLayout(addLocation, editLocation, deleteLocation);
+        HorizontalLayout manageButtons = new HorizontalLayout(addLocation, editLocation, deleteLocation, cancelForm);
         VerticalLayout gridAndButtons = new VerticalLayout(manageLocationLabel, locationGrid, manageButtons);
         gridAndButtons.setSpacing(false);
         HorizontalLayout saveAndCancelButtons = new HorizontalLayout(saveLocation, cancelLocation);
@@ -84,8 +82,8 @@ public class LocationForm extends HorizontalLayout {
         });
         deleteLocation.addClickListener(event -> {
             if(setLocation(locationGrid.asSingleSelect().getValue())) {
-                locationService.deleteLocation(binder.getBean().getId());
-                refresh();
+                if(locationService.deleteLocation(binder.getBean().getId())) refresh();
+                else locationDeletingDenial(binder.getBean());
             }
         });
         cancelForm.addClickListener(event -> {
@@ -120,5 +118,26 @@ public class LocationForm extends HorizontalLayout {
 
     public void refresh() {
         locationGrid.setItems(locationService.getLocations());
+    }
+
+    public void locationDeletingDenial(Location location) {
+        saveLocation.setEnabled(false);
+        editLocation.setEnabled(false);
+        deleteLocation.setEnabled(false);
+        cancelLocation.setEnabled(false);
+        cancelForm.setEnabled(false);
+        addLocation.setEnabled(false);
+        Label deleteDenialLabel = new Label("Location " + location.getDescription() + " is assigned to meetings, so it cannot be deleted");
+        Button deleteDenialLabelConfirmation = new Button("OK");
+        this.add(deleteDenialLabel, deleteDenialLabelConfirmation);
+        deleteDenialLabelConfirmation.addClickListener(event -> {
+            this.remove(deleteDenialLabel, deleteDenialLabelConfirmation);
+            saveLocation.setEnabled(true);
+            editLocation.setEnabled(true);
+            deleteLocation.setEnabled(true);
+            cancelLocation.setEnabled(true);
+            cancelForm.setEnabled(true);
+            addLocation.setEnabled(true);
+        });
     }
 }

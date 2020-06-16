@@ -12,10 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class UserService {
 
     final static String url = "http://localhost:8080/v1/planner/users";
+
+    private MeetingService meetingService = new MeetingService();
 
     public List<User> getUsers() {
         RestTemplate rest = new RestTemplate();
@@ -59,11 +62,25 @@ public class UserService {
         System.out.println(exchange);
     }
 
-    public void deleteUser(Long id) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("userId", id.toString());
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.delete(url + "/{userId}" ,  params);
+    public boolean deleteUser(Long id) {
+        List<Meeting> meetingsList = meetingService.getMeetings();
+        boolean isUserInMeeting = false;
+        for (Meeting meeting : meetingsList) {
+            List<User> filteredParticipants = meeting.getParticipants().stream()
+                    .filter(user -> user.getId().equals(id))
+                    .collect(Collectors.toList());
+            if (filteredParticipants.size() > 0) isUserInMeeting = true;
+        }
+
+        if (isUserInMeeting) {
+            return false;
+        } else {
+            Map<String, String> params = new HashMap<String, String>();
+            params.put("userId", id.toString());
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.delete(url + "/{userId}", params);
+            return true;
+        }
     }
 
 }
