@@ -32,11 +32,12 @@ public class WBService {
         for (int i = 0; i < arr.size(); i++) {
             JsonElement weather = arr.get(i).getAsJsonObject().get("weather");
             wBForecast.add(new WeatherBitForecast(arr.get(i).getAsJsonObject().get("datetime").getAsString(),
-                        weather.getAsJsonObject().get("icon").getAsString(),
-                        weather.getAsJsonObject().get("description").getAsString(),
-                        arr.get(i).getAsJsonObject().get("temp").getAsString()));
+                    weather.getAsJsonObject().get("icon").getAsString(),
+                    weather.getAsJsonObject().get("description").getAsString(),
+                    arr.get(i).getAsJsonObject().get("temp").getAsString()));
         }
         //System.out.println(wBForecast);
+        return wBForecast;
     }
 
     public Image getWBIcon(String icon) {
