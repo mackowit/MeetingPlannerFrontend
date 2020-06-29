@@ -37,7 +37,6 @@ public class WBService {
                         arr.get(i).getAsJsonObject().get("temp").getAsString()));
         }
         //System.out.println(wBForecast);
-        return wBForecast;
     }
 
     public Image getWBIcon(String icon) {
