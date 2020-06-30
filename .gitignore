@@ -30,3 +30,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Vaadin ###
+node_modules/
+package-lock.json
